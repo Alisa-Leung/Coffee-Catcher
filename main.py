@@ -1,4 +1,5 @@
 import pygame
+import os
 from sys import exit
 
 pygame.init()
@@ -6,14 +7,29 @@ pygame.init()
 gameWidth = 1000
 gameHeight = 600
 isPlaying = True
+gameState = "start"
 
 window = pygame.display.set_mode((gameWidth, gameHeight))
 pygame.display.set_caption("game for jessica! :)")
 clock = pygame.time.Clock()
 
-icon = pygame.image.load('assets/heartLatte.png')
+icon = pygame.image.load('assets/catLatte.png')
 pygame.display.set_icon(icon)
-pygame.font.Font("assets/pixelifySans.ttf", 50)
+
+def loadImages():
+    for fileName in os.listdir("assets/"):
+        if fileName.endswith('.png'):
+            path = os.path.join("assets/", fileName)
+            image = pygame.image.load(path).convert_alpha()
+            key.os.path.splittext(fileName)[0]
+            images[key] = image
+        return images
+
+images = loadImages()
+print(images)
+
+titleFont = pygame.font.Font("assets/pixelifySans.ttf", 70)
+textFont = pygame.font.Font("assets/pixelifySans.ttf", 30)
 
 def draw():
     print("test")
