@@ -35,8 +35,28 @@ textFont = pygame.font.Font("assets/pixelifySans.ttf", 30)
 
 creamColor = (255, 253, 208)
 
+bgY1 = 0
+bgY2 = -gameHeight
+
+def scrollBackground():
+    bgSpeed = 2
+    global bgY1, bgY2
+
+    bg = pygame.transform.scale(images['background'], (gameWidth, gameHeight))
+    window.blit(bg, (0,bgY1))
+    window.blit(bg, (0,bgY2))
+    
+    bgY1 += bgSpeed
+    bgY2 += bgSpeed
+    
+    if bgY1 >= gameHeight:
+        bgY1 = -gameHeight
+    if bgY2 >= gameHeight:
+        bgY2 = -gameHeight
+
 def startScreen():
-    window.fill(creamColor)
+    scrollBackground()
+
     titleIcon = images['catLatte'].get_rect(center=(gameWidth//2, 120))
     window.blit(images['catLatte'], titleIcon)
     
@@ -51,10 +71,45 @@ def startScreen():
     currentButton = images['play2'] if playPressed else images['play1']
     window.blit(currentButton, playRect)
 
+def introScreen():
+    window.fill(creamColor)
+    introLines = [
+        "Welcome to Coffee Catcher!",
+        "Catch falling coffee beans and creamer.",
+        "Be careful of flying plushies!",
+        "Make the perfect latte!",
+        "Use the left and right arrow keys to move.",
+        "Good luck, and have fun!",
+        "",
+        "Click anywhere to begin!"
+    ]
+
+    for i, line in enumerate(introLines):
+        introText = textFont.render(line, True, (84, 26, 69))
+        introRect = introText.get_rect(center=(gameWidth//2, 100 + i * 50))
+        window.blit(introText, introRect)
+
+cupX = gameWidth // 2
+
+def playScreen():
+    global cupX
+    scrollBackground()
+    score = 0
+    scoreText = textFont.render(f'Score: {score}', True, (84, 26, 69))
+    scoreRect = scoreText.get_rect(topleft=(10, 10))
+    window.blit(scoreText, scoreRect)
+
+    cup = images['latte7'].get_rect(center=(gameWidth//2, gameHeight - 100))
+    window.blit(images['latte7'], cup)
+
 def draw():
     match gameState:
         case "start":
             startScreen()
+        case "intro":
+            introScreen()
+        case "play":
+            playScreen()
 
 while isPlaying:
     mousePos = pygame.mouse.get_pos()
@@ -66,12 +121,19 @@ while isPlaying:
             if gameState == "start":
                 if playRect.collidepoint(mousePos):
                     playPressed = True
+            if gameState == "intro":
+                gameState = "play"
         if event.type == pygame.MOUSEBUTTONUP:
             if gameState == "start" and playPressed:
                 if playRect.collidepoint(mousePos):
                     playPressed = False
-                    gameState = "play"
+                    gameState = "intro"
                     window.blit(images['play1'], playRect)
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+                cupX -= 10
+        if keys[pygame.K_RIGHT]:
+                cupX += 10
 
     draw()
     pygame.display.update()
