@@ -96,12 +96,13 @@ fallingObjects = []
 spawnTimer = 0
 spawnDelay = 60
 score = 0
+winLatte = None
 
 objectTypes = {
-    'bean': {'image': 'beans', 'points': 10, 'speed': 5},
-    'creamer': {'image': 'creamer', 'points': 15, 'speed': 5},
-    'chiikawa': {'image': 'chiikawa', 'points': -20, 'speed': 5},
-    'kirby': {'image': 'kirby', 'points': -15, 'speed': 5}
+    'bean': {'image': 'beans', 'points': 10, 'speed': 5, 'size': 80},
+    'creamer': {'image': 'creamer', 'points': 15, 'speed': 5, 'size': 70},
+    'chiikawa': {'image': 'chiikawa', 'points': -20, 'speed': 5, 'size': 90},
+    'kirby': {'image': 'kirby', 'points': -15, 'speed': 5, 'size': 85}
 }
 
 class FallingObject:
@@ -112,18 +113,20 @@ class FallingObject:
         self.image = images[objectTypes[objType]['image']]
         self.points = objectTypes[objType]['points']
         self.speed = objectTypes[objType]['speed']
+        self.size = objectTypes[objType]['size']
 
     def update(self):
         self.y += self.speed
 
     def isOffScreen(self):
-        self.y += self.speed
+        return self.y > gameHeight
     
     def getRect(self):
-        return pygame.Rect(self.x - 25, self.y - 25, 50, 50)
+        halfSize = self.size // 2
+        return pygame.Rect(self.x - halfSize, self.y - halfSize, self.size, self.size)
 
 def playScreen():
-    global cupX, spawnTimer, fallingObjects, score
+    global cupX, spawnTimer, fallingObjects, score, gameState, winLatte
 
     scrollBackground()
     scoreText = textFont.render(f'Score: {score}', True, (84, 26, 69))
@@ -150,8 +153,33 @@ def playScreen():
         if obj.isOffScreen():
             fallingObjects.remove(obj)
             continue
-        objImage = images[objectTypes[obj.type]['image']]
-        window.blit(objImage, (obj.x - 25, obj.y - 25))
+        objImage = pygame.transform.scale(obj.image, (obj.size, obj.size))
+        halfSize = obj.size // 2
+        window.blit(objImage, (obj.x - halfSize, obj.y - halfSize))
+    
+    if score >= 100:
+        winLatte = random.choice(['catLatte', 'heartLatte', 'tulipLatte'])
+        gameState = "win"
+
+def winScreen():
+    window.fill(creamColor)
+    
+    if winLatte and winLatte in images:
+        latteImage = pygame.transform.scale(images[winLatte], (200, 200))
+        latteRect = latteImage.get_rect(center=(gameWidth//2, 200))
+        window.blit(latteImage, latteRect)
+    
+    winText = titleFont.render('Perfect Latte!', True, (84, 26, 69))
+    winRect = winText.get_rect(center=(gameWidth//2, 380))
+    window.blit(winText, winRect)
+    
+    finalScoreText = textFont.render(f'Final Score: {score}', True, (84, 26, 69))
+    finalScoreRect = finalScoreText.get_rect(center=(gameWidth//2, 450))
+    window.blit(finalScoreText, finalScoreRect)
+    
+    replayText = textFont.render("Press 'R' to replay!", True, (220, 20, 60))
+    replayRect = replayText.get_rect(center=(gameWidth//2, 520))
+    window.blit(replayText, replayRect)
 
 def draw():
     match gameState:
@@ -161,6 +189,8 @@ def draw():
             introScreen()
         case "play":
             playScreen()
+        case "win":
+            winScreen()
 
 while isPlaying:
     mousePos = pygame.mouse.get_pos()
@@ -179,7 +209,15 @@ while isPlaying:
                 if playRect.collidepoint(mousePos):
                     playPressed = False
                     gameState = "intro"
-                    window.blit(images['play1'], playRect)
+        
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r and gameState == "win":
+                score = 0
+                fallingObjects = []
+                cupX = gameWidth // 2
+                winLatte = None
+                gameState = "intro"
+    
     keys = pygame.key.get_pressed()
     if gameState == "play":
         if keys[pygame.K_LEFT]:
