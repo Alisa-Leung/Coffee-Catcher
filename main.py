@@ -11,7 +11,7 @@ isPlaying = True
 gameState = "start"
 
 window = pygame.display.set_mode((gameWidth, gameHeight))
-pygame.display.set_caption("game for jessica! :)")
+pygame.display.set_caption("Coffee Catcher")
 clock = pygame.time.Clock()
 
 icon = pygame.image.load('assets/catLatte.png')
