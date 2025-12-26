@@ -10,11 +10,11 @@ window = pygame.display.set_mode((gameWidth, gameHeight))
 pygame.display.set_caption("game for jessica! :)")
 clock = pygame.time.Clock()
 
-plainLatte = pygame.image.load('assets/plainLatte.png')
-pygame.display.set_icon(plainLatte)
+icon = pygame.image.load('assets/heartLatte.png')
+pygame.display.set_icon(icon)
 
 def draw():
-    window.blit(plainLatte, (0, 0))
+    print("test")
 
 while True:
     for event in pygame.event.get():
